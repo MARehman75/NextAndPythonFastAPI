@@ -25,9 +25,8 @@ interface Stats {
   total_products: number;
   products_in_stock: number;
   server_time: string;
+  api_type: string;
 }
-
-const API_BASE = "http://localhost:8000";
 
 export default function Home() {
   const [users, setUsers] = useState<User[]>([]);
@@ -42,15 +41,15 @@ export default function Home() {
         setLoading(true);
         setError(null);
 
-        // Fetch all data in parallel
+        // Fetch all data in parallel from Next.js API routes (which execute Python scripts)
         const [usersRes, productsRes, statsRes] = await Promise.all([
-          fetch(`${API_BASE}/api/users`),
-          fetch(`${API_BASE}/api/products`),
-          fetch(`${API_BASE}/api/stats`)
+          fetch("/api/users"),
+          fetch("/api/products"),
+          fetch("/api/stats")
         ]);
 
         if (!usersRes.ok || !productsRes.ok || !statsRes.ok) {
-          throw new Error("Failed to fetch data from Python API");
+          throw new Error("Failed to fetch data from Next.js Python API");
         }
 
         const [usersData, productsData, statsData] = await Promise.all([
@@ -90,7 +89,7 @@ export default function Home() {
           <h2 className="text-xl font-bold mb-2">Error</h2>
           <p>{error}</p>
           <p className="text-sm mt-2 text-gray-600">
-            Make sure your Python backend is running on port 8000
+            Make sure Python is installed and accessible from the command line
           </p>
         </div>
       </div>
@@ -112,7 +111,7 @@ export default function Home() {
           />
           <h1 className="text-3xl font-bold mb-2">Next.js + Python API Demo</h1>
           <p className="text-gray-600">
-            This page fetches data from a Python FastAPI backend
+            This page fetches data from Python scripts executed by Next.js API routes
           </p>
         </div>
 
@@ -140,7 +139,7 @@ export default function Home() {
 
         {/* Users Section */}
         <div className="mb-12">
-          <h2 className="text-2xl font-bold mb-6">Users from Python API</h2>
+          <h2 className="text-2xl font-bold mb-6">Users from Python Scripts</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {users.map((user) => (
               <div key={user.id} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border">
@@ -155,7 +154,7 @@ export default function Home() {
 
         {/* Products Section */}
         <div className="mb-12">
-          <h2 className="text-2xl font-bold mb-6">Products from Python API</h2>
+          <h2 className="text-2xl font-bold mb-6">Products from Python Scripts</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {products.map((product) => (
               <div key={product.id} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border">
@@ -179,9 +178,12 @@ export default function Home() {
 
         {/* Footer */}
         <footer className="text-center text-gray-500 text-sm">
-          <p>Data fetched from Python FastAPI backend running on localhost:8000</p>
+          <p>Data processed by Python scripts executed through Next.js API routes</p>
           {stats && (
-            <p className="mt-2">Last updated: {new Date(stats.server_time).toLocaleString()}</p>
+            <>
+              <p className="mt-2">Last updated: {new Date(stats.server_time).toLocaleString()}</p>
+              <p className="mt-1 text-xs">API Type: {stats.api_type}</p>
+            </>
           )}
         </footer>
       </div>
